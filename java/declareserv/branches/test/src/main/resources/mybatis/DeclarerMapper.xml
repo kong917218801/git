@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.DeclarerMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Declarer" id="declarerMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="sex" property="sex"/>
+        <result column="nation" property="nation"/>
+        <result column="graduate" property="graduate"/>
+        <result column="education" property="education"/>
+        <result column="portrait" property="portrait"/>
+        <result column="id_number" property="idNumber"/>
+        <result column="id_front_url" property="idFrontUrl"/>
+        <result column="id_back_url" property="idBackUrl"/>
+        <result column="survey_image_url" property="surveyImageUrl"/>
+        <result column="letter_image_url" property="letterImageUrl"/>
+        <result column="state" property="state"/>
+        <result column="reason" property="reason"/>
+        <result column="area_code" property="areaCode"/>
+        <result column="address" property="address"/>
+        <result column="score" property="score"/>
+        <result column="ispass" property="ispass"/>
+        <result column="regist_method" property="registMethod"/>
+        <result column="declare_guide_image_url" property="declareGuideImageUrl"/>
+        <result column="payment_url" property="paymentUrl"/>
+        <result column="fk_organiz_id" property="fkOrganizId"/>
+        <result column="fk_provence_center_id" property="fkProvenceCenterId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+
+        <result column="organiz_name" property="organizName"/>
+        <result column="service_name" property="serviceName"/>
+        <result column="organiz_area_code" property="organizAreaCode"/>
+        <result column="organiz_address" property="organizAddress"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Declarer" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    declarer
+        (name,cellphone,sex,nation,graduate,education,portrait,id_number,id_front_url,id_back_url,survey_image_url,letter_image_url,state,reason,area_code,address,score,ispass,declare_guide_image_url,fk_organiz_id,fk_provence_center_id,regist_method,payment_url)
+        VALUES
+        (#{name},#{cellphone},#{sex},#{nation},#{graduate},#{education},#{portrait},#{idNumber},#{idFrontUrl},#{idBackUrl},#{surveyImageUrl},#{letterImageUrl},#{state},#{reason},#{areaCode},#{address},#{score},#{ispass},#{declareGuideImageUrl},#{fkOrganizId},#{fkProvenceCenterId},#{registMethod},#{paymentUrl})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Declarer">
+        UPDATE
+    declarer
+        SET 
+            name=#{name},
+            cellphone=#{cellphone},
+            sex=#{sex},
+            nation=#{nation},
+            graduate=#{graduate},
+            education=#{education},
+            portrait=#{portrait},
+            id_number=#{idNumber},
+            id_front_url=#{idFrontUrl},
+            id_back_url=#{idBackUrl},
+            survey_image_url=#{surveyImageUrl},
+            letter_image_url=#{letterImageUrl},
+            state=#{state},
+            reason=#{reason},
+            area_code=#{areaCode},
+            address=#{address},
+            score=#{score},
+            ispass=#{ispass},
+            declare_guide_image_url=#{declareGuideImageUrl},
+            fk_organiz_id=#{fkOrganizId},
+            regist_method=#{registMethod},
+            fk_provence_center_id=#{fkProvenceCenterId},
+            payment_url=#{paymentUrl}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+    declarer
+        WHERE
+    id=#{id}
+    </select>
+    <select id="getByIdNumber" parameterType="java.lang.String" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+          declarer
+        WHERE
+          id_number=#{idNumber}
+    </select>
+
+    <update id="updateState">
+        UPDATE
+        declarer
+        SET
+        state=#{stateTo}
+        WHERE
+            id=#{id}
+    </update>
+
+    <update id="updateProvence">
+        update
+            declarer a
+            left join declare_enterprise b on a.id = b.fk_declarer_id
+            SET
+            a.fk_provence_center_id=#{provenceId},
+            b.fk_provence_center_id=#{provenceId}
+        WHERE
+            area_code like concat(#{areaCode}, "%")
+            and a.regist_method != 'other'
+    </update>
+    <update id="updateOrganiz">
+        update
+            declarer
+        SET
+            fk_organiz_id=#{organizId}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getByPhone" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+        declarer
+        WHERE
+        cellphone=#{cellphone}
+        AND state != 'deleted'
+    </select>
+
+    <select id="getByOrganizId" resultMap="declarerMap">
+        SELECT
+        a.*,
+        p.charger_name AS service_name
+        <include refid="organizSql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+    <select id="getByOrganizCount" resultType="java.lang.Long">
+        SELECT COUNT(a.id)
+        <include refid="organizSql"/>
+    </select>
+    <sql id="organizSql">
+        FROM
+        declarer a
+        left join organiz o on a.fk_organiz_id = o.id
+        left join provence_center p on p.id = a.fk_provence_center_id
+        <where>
+            <if test="params.cellphone != null">
+                and a.cellphone=#{params.cellphone}
+            </if>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.organizName != null">
+                and o.organiz_name like concat("%", #{params.organizName}, "%")
+            </if>
+            <if test="params.startTime != null">
+                and a.create_time &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null">
+                and a.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="params.state != null">
+                and a.state= #{params.state}
+            </if>
+            and a.fk_organiz_id=#{objectId}
+        </where>
+    </sql>
+
+    <select id="getByServiceId" resultMap="declarerMap">
+        SELECT
+        a.*
+        <include refid="provenceSql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="getByServiceCount" resultType="java.lang.Long">
+        SELECT COUNT(a.id)
+        <include refid="provenceSql"/>
+    </select>
+    <sql id="provenceSql">
+        FROM
+        (SELECT de.*,
+        c.organiz_name AS organiz_name,
+        p.charger_name AS service_name
+        FROM declarer de
+        LEFT JOIN  (SELECT b.name AS organiz_name,b.id AS id FROM organiz b ) c ON c.id =de.fk_organiz_id
+        LEFT JOIN provence_center p ON p.id = de.fk_provence_center_id
+        ) a
+        <where>
+            <if test="params.cellphone != null">
+                and a.cellphone=#{params.cellphone}
+            </if>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.organizName != null">
+                and o.organiz_name like concat("%", #{params.organizName}, "%")
+            </if>
+            <if test="params.startTime != null">
+                and a.create_time &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null">
+                and a.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="params.state != null">
+                and a.state= #{params.state}
+            </if>
+            and a.fk_provence_center_id=#{objectId}
+        </where>
+    </sql>
+
+    <select id="getPublicDeclarerList" resultMap="declarerMap">
+
+        SELECT DISTINCT
+        a.*,
+        o.name AS organiz_name,
+        b.area_code as organiz_area_code,
+        b.address as organiz_address
+        <include refid="publicQuerySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="getPublicDeclarerCount" resultType="java.lang.Long">
+        SELECT COUNT(a.id)
+        <include refid="publicQuerySql"/>
+    </select>
+
+    <sql id="publicQuerySql">
+        FROM declarer a
+        LEFT JOIN organiz o ON a.fk_organiz_id = o.id
+        LEFT JOIN organiz_address b ON b.fk_organiz_id = a.fk_organiz_id
+        <where>
+            <if test="params.name != null">
+                AND a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.areaCode != null">
+                AND b.area_code like concat(#{params.areaCode}, "%")
+            </if>
+            and a.state = 'passed'
+            and b.type=2
+        </where>
+
+    </sql>
+
+    <select id="getDeclarer" resultType="java.lang.Integer">
+        SELECT
+        COUNT(id)
+        FROM
+        declarer
+        <where>
+            id=#{params.declarerId}
+            <if test="params.registerTimeGE != null">
+                AND create_time &gt;= #{params.registerTimeGE}
+            </if>
+            <if test="params.registerTimeLT != null">
+                AND create_time &lt;= #{params.registerTimeLT}
+            </if>
+            <if test="params.scoreGE != null">
+                AND score &gt;= #{params.scoreGE}
+            </if>
+            <if test="params.scoreLT != null">
+                AND score &lt;= #{params.scoreLT}
+            </if>
+            <if test="params.name != null">
+                AND name=#{params.name}
+            </if>
+            <if test="params.idNumber != null">
+                AND id_number=#{params.idNumber}
+            </if>
+            <if test="params.cellphone != null">
+                AND cellphone=#{params.cellphone}
+            </if>
+            AND state='passed'
+        </where>
+    </select>
+    <select id="query" resultMap="declarerMap">
+        SELECT DISTINCT
+        a.*,
+        o.name AS organiz_name,
+        p.charger_name AS service_name
+        <include refid="querySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT a.id)
+        <include refid="querySql"/>
+    </select>
+
+    <sql id="querySql">
+        FROM declarer a
+        LEFT JOIN organiz o ON a.fk_organiz_id = o.id
+        LEFT JOIN provence_center p ON a.fk_provence_center_id = p.id
+        LEFT JOIN organiz_address b ON b.fk_organiz_id = a.fk_organiz_id
+        <where>
+            <if test="params.id != null">
+                and a.id = #{params.Id}
+            </if>
+            <if test="params.cellphone != null">
+                and a.cellphone=#{params.cellphone}
+            </if>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.organizName != null">
+                and o.organiz_name like concat("%", #{params.organizName}, "%")
+            </if>
+            <if test="params.startTime != null">
+                and a.create_time &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null">
+                and a.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="params.state != null">
+                and a.state= #{params.state}
+            </if>
+        </where>
+    </sql>
+
+    <select id="getByExaminee" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+        declarer
+        <where>
+            <if test="name != null">
+                name=#{name}
+            </if>
+            <if test="cellphone != null">
+                AND cellphone=#{cellphone}
+            </if>
+            <if test="idnumber != null">
+                AND id_number=#{idnumber}
+            </if>
+            AND state = 'passed'
+        </where>
+    </select>
+
+    <select id="validatyIdNumber" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+        declarer
+        where
+        id_number=#{idnumber}
+    </select>
+
+    <select id="validatyPhone" resultMap="declarerMap">
+        SELECT
+        *
+        FROM
+        declarer
+        where
+        cellphone=#{cellphone}
+    </select>
+    <select id="getByRegist" resultMap="declarerMap">
+        select
+        *
+        FROM
+        declarer
+        <where>
+            <if test="organizId != null">
+                AND fk_organiz_id=#{organizId}
+            </if>
+            <if test="serviceId != null">
+                AND fk_provence_center_id=#{serviceId}
+            </if>
+        </where>
+        and
+        regist_method=#{registMethod}
+    </select>
+
+</mapper>

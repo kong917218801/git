@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.OrganizMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Organiz" id="organizMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="id_number" property="idNumber"/>
+        <result column="id_front_url" property="idFrontUrl"/>
+        <result column="id_back_url" property="idBackUrl"/>
+        <result column="company_name" property="companyName"/>
+        <result column="reason" property="reason"/>
+        <result column="state" property="state"/>
+
+        <result column="payment_url" property="paymentUrl"/>
+        <result column="survey_image_url" property="surveyImageUrl"/>
+        <result column="letter_image_url" property="letterImageUrl"/>
+        <result column="charger_survey_image_url" property="chargerSurveyImageUrl"/>
+        <result column="charger_image_url" property="chargerImageUrl"/>
+        <result column="commerce_image_url" property="commerceImageUrl"/>
+        <result column="other_image_url" property="otherImageUrl"/>
+        <result column="base_time" property="baseTime"/>
+        <result column="regist_time" property="registTime"/>
+        <result column="fk_provence_center_id" property="fkProvenceCenterId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+
+        <result column="provenceName" property="provenceName"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Organiz" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+    organiz
+        (name,cellphone,id_number,id_front_url,id_back_url,company_name,reason,state,payment_url,survey_image_url,letter_image_url,charger_survey_image_url,charger_image_url,commerce_image_url,other_image_url,base_time,regist_time,fk_provence_center_id)
+        VALUES
+        (#{name},#{cellphone},#{idNumber},#{idFrontUrl},#{idBackUrl},#{companyName},#{reason},#{state},#{paymentUrl},#{surveyImageUrl},#{letterImageUrl},#{chargerSurveyImageUrl},#{chargerImageUrl},#{commerceImageUrl},#{otherImageUrl},#{baseTime},#{registTime},#{fkProvenceCenterId})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Organiz">
+        UPDATE
+    organiz
+        SET 
+            `name`=#{name},
+            cellphone=#{cellphone},
+            id_number=#{idNumber},
+            id_front_url=#{idFrontUrl},
+            id_back_url=#{idBackUrl},
+            company_name=#{companyName},
+            reason=#{reason},
+            state=#{state},
+            payment_url=#{paymentUrl},
+            survey_image_url=#{surveyImageUrl},
+            letter_image_url=#{letterImageUrl},
+            charger_survey_image_url=#{chargerSurveyImageUrl},
+            charger_image_url=#{chargerImageUrl},
+            commerce_image_url=#{commerceImageUrl},
+            other_image_url=#{otherImageUrl},
+            base_time=#{baseTime},
+            regist_time=#{registTime},
+            fk_provence_center_id=#{fkProvenceCenterId}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getOrganizlist" resultMap="organizMap">
+        SELECT
+        a.*,
+        e1.area_code AS areaCode,
+        c1.area_code AS liveCode,
+        e1.address AS address,
+        p1.company_name AS provenceName
+        <include refid="queryListSql"/>
+        GROUP BY a.id
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="getOrganizCount" resultType="java.lang.Integer">
+        SELECT
+        COUNT(a.id)
+        <include refid="queryListSql"/>
+    </select>
+
+    <sql id="queryListSql">
+        FROM
+        organiz a
+        LEFT JOIN organiz_address e1 ON e1.fk_organiz_id = a.id and e1.type = 2
+        LEFT JOIN organiz_address c1 ON c1.fk_organiz_id = a.id and c1.type = 1
+        LEFT JOIN provence_center p1 ON p1.id = a.fk_provence_center_id
+        <where>
+            <if test="params.name != null">
+                a.company_name LIKE concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.areaCode != null">
+                AND e1.area_code LIKE concat(#{params.areaCode},"%" )
+            </if>
+            <if test="params.state != null">
+                AND a.state =#{params.state}
+            </if>
+            <if test="params.fkProvenceCenterId != null">
+                AND a.fk_provence_center_id =#{params.fkProvenceCenterId}
+            </if>
+            <if test="params.createTimeGE != null">
+                AND a.create_time &gt;= #{params.createTimeGE}
+            </if>
+            <if test="params.createTimeLE != null">
+                AND a.create_time &lt;= #{params.createTimeLE}
+            </if>
+
+        </where>
+    </sql>
+
+
+    <select id="query" parameterType="java.util.Map" resultMap="organizMap">
+        SELECT DISTINCT
+        a.*,
+        p1.company_name AS provenceName
+        <include refid="querySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT
+        COUNT(a.id)
+        <include refid="querySql"/>
+    </select>
+
+    <sql id="querySql">
+        FROM organiz a
+        LEFT JOIN (
+        SELECT p.* FROM provence_center p
+        )p1 ON p1.id = a.fk_provence_center_id
+
+        <where>
+            <if test="params.cellphone != null">
+                a.cellphone=#{params.cellphone}
+            </if>
+            <if test="params.companyName != null">
+                and a.company_name = #{params.companyName}
+            </if>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+
+            <if test="params.createTimeGE != null">
+                AND a.create_time &gt;= #{params.createTimeGE}
+            </if>
+            <if test="params.createTimeLE != null">
+                AND a.create_time &lt;= #{params.createTimeLE}
+            </if>
+
+            <if test="params.state != null">
+                and a.state= #{params.state}
+            </if>
+            AND a.state != 'delete'
+        </where>
+    </sql>
+
+
+    <select id="getById" parameterType="Long" resultMap="organizMap">
+        SELECT
+        *
+        FROM
+    organiz
+        WHERE
+    id=#{id}
+    </select>
+
+    <select id="getByIdNumber" parameterType="String" resultMap="organizMap">
+        SELECT
+        *
+        FROM
+    organiz
+        WHERE
+    id_number=#{idNumber}
+    </select>
+
+    <select id="getByCellphone" parameterType="String" resultMap="organizMap">
+        SELECT
+        *
+        FROM
+    organiz
+        WHERE
+    cellphone=#{cellphone}
+    </select>
+
+    <update id="updateState">
+        UPDATE
+        organiz
+        SET
+        state=#{state}
+        WHERE
+        id=#{id}
+    </update>
+
+
+    <update id="updateProvenceId">
+        update
+            organiz a
+            left join organiz_address o on a.id = o.fk_organiz_id
+            SET
+            a.fk_provence_center_id=#{provenceId}
+        WHERE
+           o.type = 2
+           AND area_code like concat(#{areaCode}, "%")
+    </update>
+
+    <select id="organizName" resultMap="organizMap">
+        SELECT
+        *
+        FROM
+          organiz
+        WHERE
+          name like concat("%", #{name}, "%")
+    </select>
+    <select id="getByIdS" resultMap="organizMap">
+        select *
+        from  organiz
+        where id in
+        (
+        <foreach collection="organizIds" item="_id_" index="index" separator=",">
+          #{_id_}
+        </foreach>
+        )
+    </select>
+
+</mapper>

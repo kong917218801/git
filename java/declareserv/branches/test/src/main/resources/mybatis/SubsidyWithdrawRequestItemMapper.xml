@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.SubsidyWithdrawRequestItemMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.SubsidyWithdrawRequestItem" id="subsidyWithdrawRequestItemMap">
+        <id column="id" property="id"/>
+        <result column="amount" property="amount"/>
+        <result column="fk_subsidy_detail_id" property="fkSubsidyDetailId"/>
+        <result column="fk_subsidy_withdraw_request_id" property="fkSubsidyWithdrawRequestId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.SubsidyWithdrawRequestItem" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+            subsidy_withdraw_request_item
+        (amount,fk_subsidy_detail_id,fk_subsidy_withdraw_request_id)
+        VALUES
+        (#{amount},#{fkSubsidyDetailId},#{fkSubsidyWithdrawRequestId})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.SubsidyWithdrawRequestItem">
+        UPDATE
+            subsidy_withdraw_request_item
+        SET 
+            amount=#{amount},
+            fk_subsidy_detail_id=#{fkSubsidyDetailId},
+            fk_subsidy_withdraw_request_id=#{fkSubsidyWithdrawRequestId}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="subsidyWithdrawRequestItemMap">
+        SELECT
+        *
+        FROM
+    subsidy_withdraw_request_item
+        WHERE
+    id=#{id}
+    </select>
+
+
+    <select id="getByRequestId" parameterType="java.lang.Long" resultMap="subsidyWithdrawRequestItemMap">
+    	SELECT
+    		*
+    	FROM
+    		subsidy_withdraw_request_item
+    	WHERE
+    		fk_subsidy_withdraw_request_id=#{requestId}
+    </select>
+
+    <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        subsidy_withdraw_request_item
+        (amount,fk_subsidy_detail_id,fk_subsidy_withdraw_request_id)
+        VALUES
+        <foreach collection="items" item="_item_" index="index" separator=",">
+            (#{_item_.amount},#{_item_.fkSubsidyDetailId}, #{requestId})
+        </foreach>
+    </insert>
+</mapper>

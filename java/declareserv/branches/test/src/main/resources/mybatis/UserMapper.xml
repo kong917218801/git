@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.UserMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.User" id="userMap">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="random" property="random"/>
+        <result column="type" property="type"/>
+        <result column="object_id" property="objectId"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.User" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    user
+        (username,password,random,type,object_id,state)
+        VALUES
+        (#{username},#{password},#{random},#{type},#{objectId},#{state})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.User">
+        UPDATE
+          `user`
+        SET 
+            username=#{username},
+            password=#{password},
+            random=#{random},
+            type=#{type},
+            object_id=#{objectId},
+            state=#{state}
+        WHERE
+            id=#{id}
+    </update>
+
+    <update id="updateState">
+      update `user` set state = #{state} where `type`=#{type} and object_id = #{objectId}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="userMap">
+        SELECT
+        *
+        FROM
+          `user`
+        WHERE
+          id=#{id}
+    </select>
+
+    <select id="getByUsername" resultMap="userMap">
+      select * from `user` where username = #{username}
+    </select>
+
+    <select id="getByObjectId" resultMap="userMap">
+      select
+        *
+      from
+        `user`
+      where
+        `type`=#{userType} and object_id = #{objectId}
+    </select>
+</mapper>

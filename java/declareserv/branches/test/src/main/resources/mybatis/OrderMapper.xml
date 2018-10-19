@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.OrderMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Order" id="orderMap">
+        <id column="id" property="id"/>
+        <result column="pay_method" property="payMethod"/>
+        <result column="amount" property="amount"/>
+        <result column="state" property="state"/>
+        <result column="reason" property="reason"/>
+        <result column="fk_declarer_id" property="fkDeclarerId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Order" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    `order`
+        (pay_method,amount,state,reason,fk_declarer_id,pay_time)
+        VALUES
+        (#{payMethod},#{amount},#{state},#{reason},#{fkDeclarerId},#{payTime})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Order">
+        UPDATE
+            `order`
+        SET 
+            pay_method=#{payMethod},
+            amount=#{amount},
+            state=#{state},
+            reason=#{reason},
+            fk_declarer_id=#{fkDeclarerId},
+            pay_time=#{payTime}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="orderMap">
+        SELECT
+        *
+        FROM
+    `order`
+        WHERE
+    id=#{id}
+    </select>
+
+    <select id="getByDeclarerId" resultMap="orderMap">
+        SELECT
+        *
+        FROM
+        `order`
+        <where>
+            <if test="declarerId != null">
+                and fk_declarer_id=#{declarerId}
+            </if>
+            <if test="state != null">
+                and state=#{state}
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+</mapper>

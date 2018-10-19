@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="readWriteDataSource" class="com.cpsdb.base.datasource.ReadWriteDataSourceFactory">
+        <property name="dataId" value="DECLARE_SERV"/>
+        <property name="group" value="MYSQL"/>
+    </bean>
+
+    <!-- myBatis文件 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="readWriteDataSource" />
+        <!-- 自动扫描entity目录, 省掉Configuration.xml里的手工配置 -->
+        <property name="typeAliasesPackage" value="com.cpsdb.*.entity" />
+        <!-- 显式指定Mapper文件位置 -->
+        <property name="mapperLocations" value="classpath:mybatis/*Mapper.xml" />
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.cpsdb.declareserv.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+
+    <!-- 配置事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="readWriteDataSource" />
+    </bean>
+
+    <!-- 拦截器方式配置事物 -->
+    <tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="edit*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="remove*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="modify*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="do*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="process*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="on*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="create*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="*" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+    <bean id="readWriteDataSourceTransactionProcessor" class="com.cpsdb.base.datasource.ReadWriteDataSourceProcessor">
+        <property name="forceChoiceReadWhenWrite" value="true"/>
+    </bean>
+
+    <aop:config>
+        <aop:pointcut id="transactionPointcut" expression="execution(* com.cpsdb.*.service..*.*(..))" />
+        <aop:advisor pointcut-ref="transactionPointcut" advice-ref="transactionAdvice" />
+        <aop:aspect order="-2147483648" ref="readWriteDataSourceTransactionProcessor">
+            <aop:around pointcut-ref="transactionPointcut" method="determineReadOrWriteDB"/>
+        </aop:aspect>
+    </aop:config>
+</beans>

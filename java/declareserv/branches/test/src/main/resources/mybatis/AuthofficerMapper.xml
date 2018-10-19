@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.AuthofficerMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Authofficer" id="authofficerMap">
+        <id column="id" property="id"/>
+        <result column="Avator" property="Avator"/>
+        <result column="Name" property="Name"/>
+        <result column="idCard" property="idCard"/>
+        <result column="Organiz" property="Organiz"/>
+        <result column="Sore" property="Sore"/>
+        <result column="Card_y" property="CardY"/>
+        <result column="Card_n" property="CardN"/>
+        <result column="Tel" property="Tel"/>
+        <result column="Agreement" property="Agreement"/>
+        <result column="Ispass" property="Ispass"/>
+        <result column="Authcode" property="Authcode"/>
+        <result column="o_phone" property="oPhone"/>
+        <result column="insertTime" property="insertTime"/>
+        <result column="updateTime" property="updateTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Authofficer" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        	authofficer
+        	(Avator,Name,idCard,Organiz,Sore,Card_y,Card_n,Tel,Agreement,Ispass,Authcode,o_phone,insertTime,updateTime)
+        VALUES
+        	(#{Avator},#{Name},#{idCard},#{Organiz},#{Sore},#{CardY},#{CardN},#{Tel},#{Agreement},#{Ispass},#{Authcode},#{oPhone},#{insertTime},#{updateTime})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Authofficer">
+        UPDATE
+        	authofficer
+        SET
+            Avator=#{Avator},
+            Name=#{Name},
+            idCard=#{idCard},
+            Organiz=#{Organiz},
+            Sore=#{Sore},
+            Card_y=#{CardY},
+            Card_n=#{CardN},
+            Tel=#{Tel},
+            Agreement=#{Agreement},
+            Ispass=#{Ispass},
+            Authcode=#{Authcode},
+            o_phone=#{oPhone},
+            updateTime=#{updateTime}
+        WHERE
+        	id=#{id}
+    </update>
+
+    <update id="updateState">
+        UPDATE
+        	authofficer
+        SET
+            Ispass=#{state}
+        WHERE
+        	id=#{id}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="authofficerMap">
+    	SELECT
+    		*
+    	FROM
+    		authofficer
+    	WHERE
+    		id=#{id}
+    </select>
+
+    <select id="getByCellPhone" resultMap="authofficerMap">
+    	SELECT
+    		*
+    	FROM
+    		authofficer
+    	WHERE
+    		Tel=#{cellPhone}
+    		AND Ispass = 1
+    		order by id desc
+    		limit 1
+    </select>
+    <select id="getByName" resultMap="authofficerMap">
+        SELECT
+        *
+        FROM
+        authofficer
+        <where>
+            <if test="name != null">
+                Name LIKE concat("%", #{name}, "%")
+            </if>
+        </where>
+    </select>
+
+    <select id="query" parameterType="Map" resultMap="authofficerMap">
+        SELECT
+        *
+        <include refid="baseQuerySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" parameterType="Map" resultType="Integer">
+        SELECT COUNT(*)
+        <include refid="baseQuerySql"/>
+    </select>
+
+    <sql id="baseQuerySql">
+        FROM
+        authofficer
+        <where>
+            <if test="params.id != null">
+                id = #{params.id}
+            </if>
+            <if test="params.name != null">
+                AND Name LIKE concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.organiz != null">
+                AND Organiz LIKE concat("%", #{params.organiz}, "%")
+            </if>
+            <if test="params.organizTel != null">
+                AND Tel LIKE concat("%", #{params.organizTel}, "%")
+            </if>
+            <if test="params.cellphone != null">
+                AND o_phone LIKE concat("%", #{params.cellphone}, "%")
+            </if>
+            <if test="params.state != null">
+                AND Ispass = #{params.state}
+            </if>
+            <if test="params.createTime != null">
+                AND create_time &gt;= #{params.createTime}
+            </if>
+        </where>
+    </sql>
+
+</mapper>

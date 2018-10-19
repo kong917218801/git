@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="redisProxy" class="com.cpsdb.redis.tool.DiamondRedisFactory"/>
+
+    <!-- 自动缓存 -->
+    <bean id="dataRedisInterceptor" class="com.cpsdb.redis.aop.DataRedisInterceptor">
+        <property name="redisProxy" ref="redisProxy"/>
+    </bean>
+
+    <aop:config>
+        <aop:aspect id="cacheAspect" ref="dataRedisInterceptor">
+            <aop:pointcut id="redisService" expression="@annotation(com.cpsdb.redis.annotation.Cache)"/>
+            <aop:around pointcut-ref="redisService" method="cacheData"/>
+        </aop:aspect>
+
+        <aop:aspect id="dropCacheAspect" ref="dataRedisInterceptor">
+            <aop:pointcut id="dropCache" expression="@annotation(com.cpsdb.redis.annotation.DelCache)"/>
+            <aop:after-returning pointcut-ref="dropCache" method="dropCache"/>
+        </aop:aspect>
+        <aop:aspect id="lockAspect" ref="dataRedisInterceptor">
+            <aop:pointcut id="lock" expression="@annotation(com.cpsdb.redis.annotation.Lock)"/>
+            <aop:around pointcut-ref="lock" method="lock"/>
+        </aop:aspect>
+    </aop:config>
+</beans>

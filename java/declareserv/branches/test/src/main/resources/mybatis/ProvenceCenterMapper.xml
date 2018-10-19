@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.ProvenceCenterMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.ProvenceCenter" id="provenceCenterMap">
+        <id column="id" property="id"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="charger_name" property="chargerName"/>
+        <result column="company_name" property="companyName"/>
+        <result column="id_number" property="idNumber"/>
+        <result column="type" property="type"/>
+        <result column="reason" property="reason"/>
+        <result column="id_front_url" property="idFrontUrl"/>
+        <result column="id_back_url" property="idBackUrl"/>
+        <result column="payment_url" property="paymentUrl"/>
+        <result column="business_license_url" property="businessLicenseUrl"/>
+        <result column="charger_investigation_url" property="chargerInvestigationUrl"/>
+        <result column="company_investigation_url" property="companyInvestigationUrl"/>
+        <result column="promise_letter_url" property="promiseLetterUrl"/>
+        <result column="apply_letter_url" property="applyLetterUrl"/>
+        <result column="state" property="state"/>
+        <result column="area_code" property="areaCode"/>
+        <result column="address" property="address"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.ProvenceCenter" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    provence_center
+        (cellphone,charger_name,company_name,`type`,reason,id_number,id_front_url,id_back_url,payment_url,business_license_url,charger_investigation_url,company_investigation_url,promise_letter_url,apply_letter_url,state,area_code,address)
+        VALUES
+        (#{cellphone},#{chargerName},#{companyName},#{type},#{reason},#{idNumber},#{idFrontUrl},#{idBackUrl},#{paymentUrl},#{businessLicenseUrl},#{chargerInvestigationUrl},#{companyInvestigationUrl},#{promiseLetterUrl},#{applyLetterUrl},#{state},#{areaCode},#{address})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.ProvenceCenter">
+        UPDATE
+            provence_center
+        SET 
+            cellphone=#{cellphone},
+            charger_name=#{chargerName},
+            company_name=#{companyName},
+            `type`=#{type},
+            reason = #{reason},
+            id_number=#{idNumber},
+            id_front_url=#{idFrontUrl},
+            payment_url=#{paymentUrl},
+            id_back_url=#{idBackUrl},
+            business_license_url=#{businessLicenseUrl},
+            charger_investigation_url=#{chargerInvestigationUrl},
+            company_investigation_url=#{companyInvestigationUrl},
+            promise_letter_url=#{promiseLetterUrl},
+            apply_letter_url=#{applyLetterUrl},
+            area_code=#{areaCode},
+            address=#{address}
+        WHERE
+           id=#{id}
+    </update>
+    <select id="getById" parameterType="Long" resultMap="provenceCenterMap">
+        SELECT
+        *
+        FROM
+    provence_center
+        WHERE
+    id=#{id}
+    </select>
+    <select id="getByPhone" parameterType="String" resultMap="provenceCenterMap">
+        SELECT
+        *
+        FROM
+        provence_center
+        WHERE
+        cellphone=#{cellphone}
+    </select>
+    <select id="getIdNumber" parameterType="String" resultMap="provenceCenterMap">
+        SELECT
+            *
+        FROM
+            provence_center
+        WHERE
+            id_number=#{idNumber}
+    </select>
+    <update id="updateState">
+        UPDATE
+        provence_center
+        SET
+        state=#{state},
+        reason = #{reason}
+        WHERE
+        id=#{id}
+    </update>
+    <select id="query" parameterType="java.util.Map" resultMap="provenceCenterMap">
+        SELECT
+        a.*
+        <include refid="querySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT
+        COUNT(a.id)
+        <include refid="querySql"/>
+    </select>
+
+    <sql id="querySql">
+        FROM provence_center a
+        <where>
+            <if test="params.id != null">
+                and a.id = #{params.id}
+            </if>
+            <if test="params.cellphone != null">
+                AND a.cellphone LIKE concat("%", #{params.cellphone}, "%")
+            </if>
+            <if test="params.chargerName != null">
+                AND a.charger_name LIKE concat("%", #{params.chargerName}, "%")
+            </if>
+            <if test="params.type != null">
+                and a.type = #{params.type}
+            </if>
+            <if test="params.companyName != null">
+                AND a.company_name LIKE concat("%", #{params.companyName}, "%")
+            </if>
+            <if test="params.idNumber != null">
+                AND a.id_number LIKE concat("%", #{params.idNumber}, "%")
+            </if>
+            <if test="params.state != null">
+                and a.state = #{params.state}
+            </if>
+            <if test="params.areaCode != null">
+                AND a.area_code LIKE concat(#{params.areaCode}, "%")
+            </if>
+            <if test="params.address != null">
+                AND a.address LIKE concat("%", #{params.address}, "%")
+            </if>
+            <if test="params.createTimeGE != null">
+                AND a.create_time &gt;= #{params.createTimeGE}
+            </if>
+            <if test="params.createTimeLE != null">
+                AND a.create_time &lt;= #{params.createTimeLE}
+            </if>
+        </where>
+    </sql>
+
+    <select id="getByAreaCode" parameterType="String" resultMap="provenceCenterMap">
+        SELECT
+            *
+        FROM
+            provence_center
+        WHERE
+            area_code=#{areaCode}
+    </select>
+    <select id="getAreaCodeList" parameterType="java.util.Map" resultMap="provenceCenterMap">
+        SELECT
+            area_code
+        FROM
+            provence_center
+
+    </select>
+    <update id="updatePayment">
+        UPDATE
+        provence_center
+        SET
+        payment_url=#{payment}
+        WHERE
+        id=#{id}
+    </update>
+
+</mapper>

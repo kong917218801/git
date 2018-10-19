@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.InvoiceMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Invoice" id="invoiceMap">
+        <id column="id" property="id"/>
+        <result column="invoice_type" property="invoiceType"/>
+        <result column="name" property="name"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="revenue_number" property="revenueNumber"/>
+        <result column="email" property="email"/>
+        <result column="fk_order_id" property="fkOrderId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Invoice" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    invoice
+        (invoice_type,name,cellphone,revenue_number,email,fk_order_id,create_time,modify_time)
+        VALUES
+        (#{invoiceType},#{name},#{cellphone},#{revenueNumber},#{email},#{fkOrderId},#{createTime},#{modifyTime})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Invoice">
+        UPDATE
+    invoice
+        SET 
+            invoice_type=#{invoiceType},
+            name=#{name},
+            cellphone=#{cellphone},
+            revenue_number=#{revenueNumber},
+            email=#{email},
+            fk_order_id=#{fkOrderId},
+            create_time=#{createTime},
+            modify_time=#{modifyTime}
+        	,version = version + 1
+        WHERE
+    id=#{id}
+        	And version = #{version}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="invoiceMap">
+        SELECT
+        *
+        FROM
+    invoice
+        WHERE
+    id=#{id}
+    </select>
+
+    <select id="getByOrderId" resultMap="invoiceMap">
+        SELECT
+    		*
+    	FROM
+    		invoice
+    	WHERE
+    		fk_order_id=#{orderId}
+    </select>
+</mapper>

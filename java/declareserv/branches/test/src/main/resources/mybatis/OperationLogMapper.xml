@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.OperationLogMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.OperationLog" id="operationLogMap">
+        <id column="id" property="id"/>
+        <result column="state_from" property="stateFrom"/>
+        <result column="event" property="event"/>
+        <result column="state_to" property="stateTo"/>
+        <result column="owner" property="owner"/>
+        <result column="object_id" property="objectId"/>
+        <result column="type" property="type"/>
+        <result column="mark" property="mark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.OperationLog" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    operation_log
+        (state_from,event,state_to,owner,object_id,type,mark,create_time,modify_time)
+        VALUES
+        (#{stateFrom},#{event},#{stateTo},#{owner},#{objectId},#{type},#{mark},#{createTime},#{modifyTime})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.OperationLog">
+        UPDATE
+    operation_log
+        SET 
+            state_from=#{stateFrom},
+            event=#{event},
+            state_to=#{stateTo},
+            owner=#{owner},
+            object_id=#{objectId},
+            type=#{type},
+            mark=#{mark},
+            create_time=#{createTime},
+            modify_time=#{modifyTime}
+        	,version = version + 1
+        WHERE
+    id=#{id}
+        	And version = #{version}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="operationLogMap">
+        SELECT
+        *
+        FROM
+    operation_log
+        WHERE
+    id=#{id}
+    </select>
+
+    <select id="getByOwner" resultMap="operationLogMap">
+    	SELECT
+    		o.*,
+    		d.name AS enterprise_name
+    	FROM
+    		operation_log o
+    	    LEFT JOIN declare_enterprise d ON o.object_id = d.id
+    	WHERE
+    		o.owner=#{username}
+    		AND o.type=#{declareEnterprise}
+    </select>
+    <select id="getByIdType" resultMap="operationLogMap">
+    	SELECT
+    		o.*
+    	FROM
+    		operation_log o
+    	WHERE
+    		o.object_id=#{id}
+    		AND o.type=#{type}
+    </select>
+
+</mapper>

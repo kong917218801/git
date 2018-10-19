@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.SubsidyDetailMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.SubsidyDetail" id="subsidyDetailMap">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="target_id" property="targetId"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="quantity" property="quantity"/>
+        <result column="amount" property="amount"/>
+        <result column="percent" property="percent"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.SubsidyDetail" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+          subsidy_detail
+        (user_id,target_id,name,type,quantity,amount,percent,state)
+        VALUES
+        (#{userId},#{targetId}, #{name},#{type},#{quantity},#{amount},#{percent},#{state})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.SubsidyDetail">
+        UPDATE
+            subsidy_detail
+        SET 
+            user_id=#{userId},
+            name=#{name},
+            type=#{type},
+            quantity=#{quantity},
+            amount=#{amount},
+            percent=#{percent},
+            state=#{state}
+        WHERE
+            id=#{id}
+    </update>
+
+    <update id="updateState">
+        UPDATE
+        subsidy_detail
+        SET
+        state=#{state}
+        where id in (
+        <foreach collection="detailIdSet" item="_id_" index="index" separator=",">
+            #{_id_}
+        </foreach>
+        )
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="subsidyDetailMap">
+        SELECT
+          *
+        FROM
+          subsidy_detail
+        WHERE
+          id=#{id}
+    </select>
+
+    <select id="getUnwithdrawedAmount" resultType="java.math.BigDecimal">
+        select sum(amount*percent) from subsidy_detail where user_id =#{userId} and state = 'unwithdrawed'
+    </select>
+
+    <select id="query" parameterType="java.util.Map" resultMap="subsidyDetailMap">
+        SELECT
+        *
+        <include refid="baseQuerySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        <include refid="baseQuerySql"/>
+    </select>
+
+    <sql id="baseQuerySql">
+        FROM
+        subsidy_detail a
+        <where>
+            <if test="params.userId != null">
+                a.user_id = #{params.userId}
+            </if>
+            <if test="params.name != null">
+                AND a.name LIKE concat("%", #{params.name}, "%")
+            </if>
+
+            <if test="params.createTimeGE != null">
+                AND a.create_time &gt;= #{params.createTimeGE}
+            </if>
+            <if test="params.createTimeLE != null">
+                AND a.create_time &lt;= #{params.createTimeLE}
+            </if>
+
+            <if test="params.state != null">
+                AND a.state = #{params.state}
+            </if>
+
+            <if test="params.type">
+                AND a.type = #{params.type}
+            </if>
+        </where>
+    </sql>
+</mapper>

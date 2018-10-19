@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.DeclareToEnterpriseMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.DeclareToEnterprise" id="declareToEnterpriseMap">
+        <id column="id" property="id"/>
+        <result column="enterprise_name" property="enterpriseName"/>
+        <result column="fk_declare_enterprise_id" property="fkDeclareEnterpriseId"/>
+        <result column="fk_enterprise_id" property="fkEnterpriseId"/>
+        <result column="enterprise_state" property="enterpriseState"/>
+        <result column="paid_amount" property="paidAmount"/>
+        <result column="code_count" property="codeCount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.DeclareToEnterprise" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+          declare_to_enterprise
+        (enterprise_name,fk_declare_enterprise_id,fk_enterprise_id,enterprise_state,paid_amount,code_count)
+        VALUES
+        (#{enterpriseName},#{fkDeclareEnterpriseId},#{fkEnterpriseId},#{enterpriseState},#{paidAmount},#{codeCount})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.DeclareToEnterprise">
+        UPDATE
+          declare_to_enterprise
+        SET 
+            enterprise_name=#{enterpriseName},
+            fk_declare_enterprise_id=#{fkDeclareEnterpriseId},
+            fk_enterprise_id=#{fkEnterpriseId},
+            enterprise_state=#{enterpriseState},
+            paid_amount=#{paidAmount},
+            code_count=#{codeCount}
+        WHERE
+          id=#{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="declareToEnterpriseMap">
+        SELECT
+        *
+        FROM
+          declare_to_enterprise
+        WHERE
+          id=#{id}
+    </select>
+
+    <select id="getEnterpriseId" resultType="java.lang.Long">
+        SELECT
+        a.`fk_enterprise_id`
+        FROM
+        `declare_to_enterprise` a
+        INNER JOIN `declare_enterprise` b
+        ON a.`fk_declare_enterprise_id` = b.`id`
+        WHERE a.`fk_enterprise_id` IS NOT NULL
+        <if test="organizId != null">
+            and b.fk_organiz_id = #{organizId}
+        </if>
+        <if test="serviceId != null">
+            and b.fk_provence_center_id = #{serviceId}
+        </if>
+        <if test="declarerId != null">
+            and b.fk_declarer_id = #{declarerId}
+        </if>
+    </select>
+
+    <select id="getByEnterpriseId"  resultMap="declareToEnterpriseMap">
+         SELECT
+    		*
+    	FROM
+    		`declare_to_enterprise`
+    	WHERE
+    		fk_enterprise_id=#{enterpriserId}
+    </select>
+    <select id="getByDeclareEnterpriseId" resultMap="declareToEnterpriseMap">
+
+         SELECT
+    		*
+    	FROM
+    		`declare_to_enterprise`
+    	WHERE
+    		fk_declare_enterprise_id=#{declareEnterpriseId}
+    </select>
+</mapper>

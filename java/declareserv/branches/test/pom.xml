@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.cpsdb.declareserv</groupId>
+    <artifactId>declareserv</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>declareserv</name>
+    <description>declareserv management system!</description>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.0.2.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <project.environment>-SNAPSHOT</project.environment>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <project.environment/>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.zimgapi</groupId>
+            <artifactId>zimg-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.base</groupId>
+            <artifactId>base</artifactId>
+            <version>1.0.4${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.redis</groupId>
+            <artifactId>redis</artifactId>
+            <version>1.0.1${project.environment}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cpsdb.thirdapi</groupId>
+            <artifactId>third-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.validator</groupId>
+            <artifactId>validator</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.penggle</groupId>
+            <artifactId>kaptcha</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.declareservapi</groupId>
+            <artifactId>declareserv-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+		
+        <dependency>
+            <groupId>com.cpsdb.baseservapi</groupId>
+            <artifactId>baseserv-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>8.8.10</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>geocoder</artifactId>
+            <version>2.87</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>prefixmapper</artifactId>
+            <version>2.87</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.enterpriseapi</groupId>
+            <artifactId>enterprise-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.fansapi</groupId>
+            <artifactId>fans-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.goodsapi</groupId>
+            <artifactId>goods-api</artifactId>
+            <version>1.0.1${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.examinationapi</groupId>
+            <artifactId>examination-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.7.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.payapi</groupId>
+            <artifactId>pay-api</artifactId>
+            <version>1.0.2${project.environment}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cpsdb.gpsapi</groupId>
+            <artifactId>gps-api</artifactId>
+            <version>1.0.0${project.environment}</version>
+        </dependency>
+
+
+        <!-- PDF -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itext-asian</artifactId>
+            <version>5.2.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

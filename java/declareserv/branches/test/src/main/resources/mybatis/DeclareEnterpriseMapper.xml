@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.DeclareEnterpriseMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.DeclareEnterprise" id="declareEnterpriseMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="charger" property="charger"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="id_number" property="idNumber"/>
+        <result column="id_front_url" property="idFrontUrl"/>
+        <result column="id_back_url" property="idBackUrl"/>
+        <result column="license_image_url" property="licenseImageUrl"/>
+        <result column="production_image_url" property="productionImageUrl"/>
+        <result column="capital_image_url" property="capitalImageUrl"/>
+        <result column="enterprise_survey_image_url" property="enterpriseSurveyImageUrl"/>
+        <result column="enterprise_charger_survey_image_url" property="enterpriseChargerSurveyImageUrl"/>
+        <result column="enterprise_shind_image_url" property="enterpriseShindImageUrl"/>
+        <result column="authorization_image_url" property="authorizationImageUrl"/>
+        <result column="other_image_url" property="otherImageUrl"/>
+        <result column="state" property="state"/>
+        <result column="reason" property="reason"/>
+        <result column="fk_user_id" property="fkUserId"/>
+        <result column="fk_declarer_id" property="fkDeclarerId"/>
+        <result column="fk_organiz_id" property="fkOrganizId"/>
+        <result column="fk_provence_center_id" property="fkProvenceCenterId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+
+        <result column="declarer_name" property="declarerName"/>
+        <result column="organiz_name" property="organizName"/>
+        <result column="code_count" property="codeCount"/>
+        <result column="paid_amount" property="paidAmount"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.DeclareEnterprise" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    declare_enterprise
+        (name,charger,cellphone,id_number,id_front_url,id_back_url,license_image_url,production_image_url,capital_image_url,enterprise_survey_image_url,enterprise_charger_survey_image_url,enterprise_shind_image_url,authorization_image_url,other_image_url,state,reason,fk_user_id,fk_declarer_id,fk_organiz_id,fk_provence_center_id)
+        VALUES
+        (#{name},#{charger},#{cellphone},#{idNumber},#{idFrontUrl},#{idBackUrl},#{licenseImageUrl},#{productionImageUrl},#{capitalImageUrl},#{enterpriseSurveyImageUrl},#{enterpriseChargerSurveyImageUrl},#{enterpriseShindImageUrl},#{authorizationImageUrl},#{otherImageUrl},#{state},#{reason},#{fkUserId},#{fkDeclarerId},#{fkOrganizId},#{fkProvenceCenterId})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.DeclareEnterprise">
+        UPDATE
+    declare_enterprise
+        SET 
+            name=#{name},
+            charger=#{charger},
+            cellphone=#{cellphone},
+            id_number=#{idNumber},
+            id_front_url=#{idFrontUrl},
+            id_back_url=#{idBackUrl},
+            license_image_url=#{licenseImageUrl},
+            production_image_url=#{productionImageUrl},
+            capital_image_url=#{capitalImageUrl},
+            enterprise_survey_image_url=#{enterpriseSurveyImageUrl},
+            enterprise_charger_survey_image_url=#{enterpriseChargerSurveyImageUrl},
+            enterprise_shind_image_url=#{enterpriseShindImageUrl},
+            authorization_image_url=#{authorizationImageUrl},
+            other_image_url=#{otherImageUrl},
+            state=#{state},
+            reason=#{reason},
+            fk_user_id=#{fkUserId},
+            fk_declarer_id=#{fkDeclarerId},
+            fk_organiz_id=#{fkOrganizId},
+            fk_provence_center_id=#{fkProvenceCenterId},
+            create_time=#{createTime},
+            modify_time=#{modifyTime}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="declareEnterpriseMap">
+       SELECT a.*,o.`name` AS declarer_name FROM declareserv.`declare_enterprise` a LEFT JOIN declarer o ON o.`id`= a.`fk_declarer_id` WHERE a.`id`=#{id};
+    </select>
+
+    <select id="getByCellPhone" resultMap="declareEnterpriseMap">
+        SELECT
+    		*
+    	FROM
+    		declare_enterprise
+    	WHERE
+    		cellphone=#{cellphone}
+    </select>
+    <select id="getByIdNumber" resultMap="declareEnterpriseMap">
+        SELECT
+    		*
+    	FROM
+    		declare_enterprise
+    	WHERE
+    		id_number=#{idNumber}
+    </select>
+
+    <update id="updateState">
+        UPDATE
+        declare_enterprise
+        SET
+        state=#{state}
+        WHERE
+        id=#{id}
+    </update>
+
+    <update id="updateOrganiz">
+        update
+            declare_enterprise
+        SET
+            fk_organiz_id=#{organizId}
+        WHERE
+            fk_declarer_id=#{declarerId}
+    </update>
+
+
+    <select id="queryDeclarer" resultMap="declareEnterpriseMap">
+        SELECT
+        a.id,
+        b.name as declarer_name,
+        a.name,
+        a.charger,
+        a.create_time,
+        if(a.state = 'pass', ifnull(d.enterprise_state, a.state), a.state) as state,
+        d.code_count,
+        d.paid_amount
+        <include refid="queryDeclarerSql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="getEnterpriseCount" resultType="java.lang.Long">
+        SELECT COUNT(a.id)
+        <include refid="queryDeclarerSql"/>
+    </select>
+
+    <sql id="queryDeclarerSql">
+        FROM declare_enterprise a
+        LEFT JOIN user u ON a.fk_user_id = u.id
+        LEFT JOIN declare_to_enterprise d ON a.id = d.fk_declare_enterprise_id
+        LEFT JOIN declarer b ON a.fk_declarer_id = b.id
+        <where>
+            <if test="params.declarerId != null">
+                and a.fk_declarer_id=#{params.declarerId}
+            </if>
+            <if test="params.organizId != null">
+                and a.fk_organiz_id=#{params.organizId}
+            </if>
+            <if test="params.provenceCenterId != null">
+                and a.fk_provence_center_id=#{params.provenceCenterId}
+            </if>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.charger != null">
+                and b.name like concat("%", #{params.charger}, "%")
+            </if>
+            <if test="params.state != null">
+                and a.state= #{params.state} OR d.enterprise_state = #{params.state}
+            </if>
+
+        </where>
+    </sql>
+
+    <select id="queryList" resultMap="declareEnterpriseMap">
+        SELECT DISTINCT
+        a.id,
+        a.name,
+        a.charger,
+        b.name AS declarer_name,
+        o.name AS organiz_name,
+        a.create_time,
+        a.fk_user_id,
+        if(a.state = 'pass', ifnull(d.enterprise_state, a.state), a.state) as state
+        <include refid="baseQuerySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="queryOrganizCount" resultType="java.lang.Long">
+        SELECT COUNT(a.id)
+        <include refid="baseQuerySql"/>
+    </select>
+
+    <select id="getByEnterpriseName" resultMap="declareEnterpriseMap">
+        select
+        *
+        from
+        declare_enterprise
+        where
+        name=#{enterpriseName}
+    </select>
+
+    <sql id="baseQuerySql">
+        FROM declare_enterprise a
+        LEFT JOIN declare_to_enterprise d ON a.id = d.fk_declare_enterprise_id
+        LEFT JOIN declarer b ON a.`fk_declarer_id` = b.`id`
+        LEFT JOIN organiz o ON a.`fk_organiz_id` = o.`id`
+        <where>
+            <if test="params.name != null">
+                and a.name like concat("%", #{params.name}, "%")
+            </if>
+            <if test="params.startTime != null">
+                AND a.create_time &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null">
+                AND a.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="params.state != null">
+                and a.state= #{params.state} OR d.enterprise_state = #{params.state}
+            </if>
+        </where>
+    </sql>
+</mapper>

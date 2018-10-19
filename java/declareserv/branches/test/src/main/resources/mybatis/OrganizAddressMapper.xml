@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.OrganizAddressMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.OrganizAddress" id="organizAddressMap">
+        <id column="id" property="id"/>
+        <result column="area_code" property="areaCode"/>
+        <result column="type" property="type"/>
+        <result column="fk_organiz_id" property="fkOrganizId"/>
+        <result column="address" property="address"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.OrganizAddress" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+    organiz_address
+        (area_code,type,fk_organiz_id,address,longitude,latitude,create_time,modify_time)
+        VALUES
+        (#{areaCode},#{type},#{fkOrganizId},#{address},#{longitude},#{latitude},#{createTime},#{modifyTime})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.OrganizAddress">
+        UPDATE
+    organiz_address
+        SET 
+            area_code=#{areaCode},
+            type=#{type},
+            fk_organiz_id=#{fkOrganizId},
+            address=#{address},
+            longitude=#{longitude},
+            latitude=#{latitude},
+            create_time=#{createTime},
+            modify_time=#{modifyTime}
+        	,version = version + 1
+        WHERE
+    id=#{id}
+        	And version = #{version}
+    </update>
+
+    <select id="getById" parameterType="Long" resultMap="organizAddressMap">
+        SELECT
+        *
+        FROM
+    organiz_address
+        WHERE
+    id=#{id}
+    </select>
+
+
+    <select id="getaddress" resultMap="organizAddressMap">
+        SELECT
+        *
+        FROM
+        organiz_address
+        <where>
+            <if test="organizId != null">
+                fk_organiz_id=#{organizId}
+            </if>
+            <if test="adressType != null">
+                AND `type`=#{adressType}
+            </if>
+        </where>
+        LIMIT 1
+    </select>
+
+
+</mapper>

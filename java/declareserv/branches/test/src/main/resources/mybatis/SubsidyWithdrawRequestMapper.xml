@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.SubsidyWithdrawRequestMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.SubsidyWithdrawRequest" id="subsidyWithdrawRequestMap">
+        <id column="id" property="id"/>
+        <result column="user_type" property="userType"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="fk_subsidy_bank_id" property="fkSubsidyBankId"/>
+        <result column="state" property="state"/>
+        <result column="reason" property="reason"/>
+        <result column="amount" property="amount"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="cellphone" property="cellphone"/>
+        <result column="version" property="version"/>
+
+        <result column="name" property="name"/>
+        <result column="bank" property="bank"/>
+        <result column="bankName" property="bankName"/>
+        <result column="account" property="account"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.SubsidyWithdrawRequest" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+          subsidy_withdraw_request
+        (user_id,user_type,username,fk_subsidy_bank_id,state,reason,amount,cellphone)
+        VALUES
+        (#{userId},#{userType},#{username},#{fkSubsidyBankId},#{state},#{reason},#{amount},#{cellphone})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.SubsidyWithdrawRequest">
+        UPDATE
+            subsidy_withdraw_request
+        SET 
+            user_id=#{userId},
+            user_type=#{userType},
+            username=#{username},
+            fk_subsidy_bank_id=#{fkSubsidyBankId},
+            state=#{state},
+            reason=#{reason},
+            amount=#{amount},
+            cellphone=#{cellphone}
+        WHERE
+            id=#{id}
+    </update>
+
+    <update id="updateState">
+        UPDATE
+            subsidy_withdraw_request
+        SET
+            state=#{state}
+        WHERE
+            id=#{id}
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="subsidyWithdrawRequestMap">
+        SELECT
+            *
+        FROM
+            subsidy_withdraw_request
+        WHERE
+            id=#{id}
+    </select>
+
+
+    <select id="amount" resultType="com.cpsdb.declareserv.dto.JPlatformWithdrewRcordAmounts">
+        SELECT
+        a.state,
+        sum(a.amount) as amount,
+        count(*) as count
+        FROM
+        subsidy_withdraw_request a
+        GROUP BY
+        a.state
+    </select>
+
+    <select id="query" resultMap="subsidyWithdrawRequestMap">
+        SELECT
+        a.*,
+        c.name AS name,
+        d.name as bank,
+        c.bank_name as bankName,
+        c.account AS account
+        <include refid="querySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        <include refid="querySql"/>
+    </select>
+
+    <sql id="querySql">
+        FROM subsidy_withdraw_request a
+        LEFT JOIN subsidy_bank c ON c.id=a.fk_subsidy_bank_id
+        LEFT JOIN bank d ON c.fk_bank_id = d.id
+        <where>
+            <if test="params.username != null">
+                a.username LIKE concat ("%",#{params.username}, "%")
+            </if>
+            <if test="params.userId != null">
+                AND c.user_id = #{params.userId}
+            </if>
+            <if test="params.account != null">
+                AND c.account = LIKE concat ("%", #{params.account}, "%")
+            </if>
+            <if test="params.sn != null">
+                AND a.id LIKE concat ("%",#{params.sn}, "%")
+            </if>
+            <if test="params.idList != null">
+                and a.id in (
+                <foreach collection="params.idList" item="_id_" index="index" separator=",">
+                    #{_id_}
+                </foreach>
+                )
+            </if>
+            <if test="params.state != null">
+                AND a.state = #{params.state}
+            </if>
+        </where>
+    </sql>
+</mapper>

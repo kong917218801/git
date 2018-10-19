@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cpsdb.declareserv.dao.RecommendMapper">
+    <resultMap type="com.cpsdb.declareserv.entity.Recommend" id="recommendMap">
+        <id column="id" property="id"/>
+        <result column="recommend_id" property="recommendId"/>
+        <result column="target_id" property="targetId"/>
+        <result column="target_name" property="targetName"/>
+        <result column="target_state" property="targetState"/>
+        <result column="create_time" property="createTime"/>
+        <result column="modify_time" property="modifyTime"/>
+        <result column="version" property="version"/>
+
+        <result column="subsidy_state" property="subsidyState"/>
+        <result column="target_type" property="targetType"/>
+        <result column="recommend_type" property="recommendType"/>
+        <result column="target_cellphone" property="targetCellphone"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.cpsdb.declareserv.entity.Recommend" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO
+          recommend
+        (recommend_id,target_id,target_name,target_state)
+        VALUES
+        (#{recommendId},#{targetId},#{targetName},#{targetState})
+    </insert>
+
+    <update id="update" parameterType="com.cpsdb.declareserv.entity.Recommend">
+        UPDATE
+            recommend
+        SET 
+            recommend_id=#{recommendId},
+            target_id=#{targetId},
+            target_state=#{targetState},
+            target_name=#{targetName}
+        WHERE
+            id=#{id}
+    </update>
+
+    <update id="updateTargetState">
+        UPDATE
+            recommend
+        SET
+            target_state=#{state}
+        WHERE
+            target_id=#{targetUserId}
+    </update>
+
+    <select id="getByTargetId" resultMap="recommendMap">
+        SELECT
+        *
+        FROM
+        recommend
+        WHERE
+        target_id=#{targetUserId}
+        limit 1
+    </select>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="recommendMap">
+        SELECT
+          *
+        FROM
+          recommend
+        WHERE
+          id=#{id}
+    </select>
+
+
+    <select id="query" resultMap="recommendMap">
+        SELECT
+        a.*,
+        b.username as target_cellphone,
+        b.type as target_type,
+        c.state as subsidy_state
+        <include refid="querySql"/>
+        order by ${pager.orderColumn} ${pager.orderType}
+        LIMIT #{pager.startNum},#{pager.pageCount}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(a.id)
+        <include refid="querySql"/>
+    </select>
+
+    <sql id="querySql">
+        FROM recommend a
+        LEFT JOIN `user` b on b.id = a.target_id
+        left join `subsidy_detail` c on c.user_id = a.recommend_id and c.target_id = a.target_id and c.type = '推荐补贴'
+        <where>
+            <if test="params.targetType != null">
+                AND b.type = #{params.targetType}
+            </if>
+            <if test="params.targetName != null">
+                AND a.target_name LIKE concat ("%",#{params.targetName}, "%")
+            </if>
+            <if test="params.targetCellphone != null">
+                AND b.username LIKE concat ("%",#{params.targetCellphone}, "%")
+            </if>
+            <if test="params.state != null">
+                AND a.target_state = #{params.state}
+            </if>
+            <if test="params.subsidyState != null">
+                AND a.subsidyState = #{params.subsidyState}
+            </if>
+            <if test="params.createTimeGE != null">
+                AND a.create_time &gt;= #{params.createTimeGE}
+            </if>
+            <if test="params.createTimeLE != null">
+                AND a.create_time &lt;= #{params.createTimeLE}
+            </if>
+            <if test="params.recommendId != null">
+                AND a.recommend_id = #{params.recommendId}
+            </if>
+
+        </where>
+    </sql>
+
+
+    <select id="getUserName" parameterType="java.lang.Long" resultType="String">
+        SELECT
+          u.username
+        FROM
+          recommend r
+            left join user u on u.id = r.recommend_id
+        WHERE
+          target_id=#{targetId}
+    </select>
+
+
+
+
+</mapper>
